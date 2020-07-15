@@ -1,4 +1,4 @@
-import { EntityRepository, Repository, getRepository } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 
 import Transaction from '../models/Transaction';
 
@@ -12,62 +12,29 @@ interface Balance {
 class TransactionsRepository extends Repository<Transaction> {
   public async getBalance(): Promise<Balance> {
     // TODO
-    const transactionRepository = getRepository(Transaction);
-    const transactions = await transactionRepository.find();
+    const transactions = await this.find();
 
-    let totalOutcome = 0;
-    let totalIncome = 0;
-    if (transactions.length > 0) {
-      const foundIncome = transactions.find(
-        transaction => transaction.type === 'income',
-      );
-      if (foundIncome) {
-        const incomeTransactions = transactions.filter(
-          transaction => transaction.type === 'income',
-        );
+    const balance = transactions.reduce(
+      (acumulator, currentValue) => {
+        return currentValue.type === 'income'
+          ? {
+              income: acumulator.income + Number(currentValue.value),
+              outcome: acumulator.outcome,
+              total: acumulator.total + Number(currentValue.value),
+            }
+          : {
+              income: acumulator.income,
+              outcome: acumulator.outcome + Number(currentValue.value),
+              total: acumulator.total - Number(currentValue.value),
+            };
+      },
+      {
+        income: 0,
+        outcome: 0,
+        total: 0,
+      },
+    );
 
-        const incomeValues = incomeTransactions.map(
-          transaction => transaction.value,
-        );
-
-        totalIncome = incomeValues.reduce(
-          (accumulator, currentValue) => accumulator + currentValue,
-        );
-      }
-
-      const foundOutcome = transactions.find(
-        transaction => transaction.type === 'outcome',
-      );
-
-      if (foundOutcome) {
-        const outcomeTransactions = transactions.filter(
-          transaction => transaction.type === 'outcome',
-        );
-
-        const outcomeValues = outcomeTransactions.map(
-          transaction => transaction.value,
-        );
-
-        totalOutcome = outcomeValues.reduce(
-          (accumulator, currentValue) => accumulator + currentValue,
-        );
-      }
-
-      const total = totalIncome - totalOutcome;
-
-      const balance = {
-        income: totalIncome,
-        outcome: totalOutcome,
-        total,
-      };
-
-      return balance;
-    }
-    const balance = {
-      income: 0,
-      outcome: 0,
-      total: 0,
-    };
     return balance;
   }
 }

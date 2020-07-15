@@ -1,6 +1,7 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export default class CreateCategory1593603460499 implements MigrationInterface {
+export default class CreateCategories1594179945695
+  implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
       new Table({
@@ -8,7 +9,7 @@ export default class CreateCategory1593603460499 implements MigrationInterface {
         columns: [
           {
             name: 'id',
-            type: 'varchar',
+            type: 'uuid',
             isPrimary: true,
             generationStrategy: 'uuid',
             default: 'uuid_generate_v4()',
@@ -16,7 +17,6 @@ export default class CreateCategory1593603460499 implements MigrationInterface {
           {
             name: 'title',
             type: 'varchar',
-            isNullable: false,
           },
           {
             name: 'created_at',
